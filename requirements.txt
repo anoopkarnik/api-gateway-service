@@ -1,0 +1,8 @@
+flask
+Flask-SQLAlchemy
+panda
+numpy
+gunicorn
+python-dotenv
+pytz
+apscheduler

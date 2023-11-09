@@ -1,5 +1,8 @@
 from flask import Blueprint, request, jsonify
 import os
+import logging
+
+logger = logging.getLogger(__name__)
 
 payload_controller = Blueprint("payload_controller",__name__)
 
@@ -11,6 +14,7 @@ def health_check():
 def notion_service():
 	service_port = os.environ.get('NOTION_SERVICE_PORT')
 	service_url = f"http://0.0.0.0:{service_port}"
+	logger.info(f'Redirecting request to {service_url}')
 	response = requests.request(
 		method=request.method,
 		url=service_url,

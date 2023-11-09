@@ -14,8 +14,7 @@ def health_check():
 
 @payload_controller.route("/notion/<path:subpath>",methods=['POST','GET','PATCH'])
 def notion_service(subpath):
-	service_port = os.environ.get('NOTION_SERVICE_PORT')
-	service_url = f"http://0.0.0.0:{service_port}/{subpath}"
+	service_url = f"http://0.0.0.0:8110/{subpath}"
 	logger.info(f'Redirecting request to {service_url}')
 	response = requests.request(
 		method=request.method,

@@ -25,3 +25,17 @@ def notion_service(subpath):
 		allow_redirects=False
 	)
 	return (response.content, response.status_code, response.headers.items())
+
+@payload_controller.route("/chatgpt/<path:subpath>",methods=['POST','GET','PATCH'])
+def chatgpt_service(subpath):
+	service_url = f"http://chatgpt-api-service:8111/{subpath}"
+	logger.info(f'Redirecting request to {service_url}')
+	response = requests.request(
+		method=request.method,
+		url=service_url,
+		headers={key:value for key,value in request.headers if key!='Host'},
+		data=request.get_data(),
+		cookies=request.cookies,
+		allow_redirects=False
+	)
+	return (response.content, response.status_code, response.headers.items())

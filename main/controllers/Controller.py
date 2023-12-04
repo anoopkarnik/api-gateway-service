@@ -14,7 +14,9 @@ def health_check():
 
 @payload_controller.route("/notion/<path:subpath>",methods=['POST','GET','PATCH'])
 def notion_service(subpath):
-	service_url = f"http://notion-flask-api-service:8110/{subpath}"
+	notion_service_network_name = os.environ.get('NOTION_SERVICE_NETWORK_NAME')
+	notion_service_network_port = os.environ.get('NOTION_SERVICE_NETWORK_PORT')
+	service_url = f"http://{notion_service_network_name}:{notion_service_network_port}/{subpath}"
 	logger.info(f'Redirecting request to {service_url}')
 	response = requests.request(
 		method=request.method,
@@ -28,7 +30,9 @@ def notion_service(subpath):
 
 @payload_controller.route("/chatgpt/<path:subpath>",methods=['POST','GET','PATCH'])
 def chatgpt_service(subpath):
-	service_url = f"http://chatgpt-api-service:8111/{subpath}"
+	chatgpt_service_network_name = os.environ.get('CHATGPT_SERVICE_NETWORK_NAME')
+	chatgpt_service_network_port = os.environ.get('CHATGPT_SERVICE_NETWORK_PORT')
+	service_url = f"http://{chatgpt_service_network_name}:{chatgpt_service_network_port}/{subpath}"
 	logger.info(f'Redirecting request to {service_url}')
 	response = requests.request(
 		method=request.method,

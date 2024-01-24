@@ -6,4 +6,3 @@ gunicorn
 python-dotenv
 pytz
 apscheduler
-threading

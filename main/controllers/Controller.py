@@ -32,7 +32,7 @@ def notion_service(subpath):
     notion_service_network_port = os.environ.get('NOTION_SERVICE_NETWORK_PORT')
     service_url = f"http://{notion_service_network_name}:{notion_service_network_port}/{subpath}"
     logger.info(f'Redirecting request to {service_url}')
-    if request.get_data().get('call_type','sync') == 'async':
+    if request.json.get('call_type','sync') == 'async':
     # Spawn a new thread for the service call
         threading.Thread(target=async_service_call, args=(
             request.method,
@@ -61,7 +61,7 @@ def chatgpt_service(subpath):
     service_url = f"http://{chatgpt_service_network_name}:{chatgpt_service_network_port}/{subpath}"
     logger.info(f'Redirecting request to {service_url}')
 
-    if request.get_data().get('call_type','sync') == 'async':
+    if request.json.get('call_type','sync') == 'async':
     # Spawn a new thread for the service call
         threading.Thread(target=async_service_call, args=(
             request.method,

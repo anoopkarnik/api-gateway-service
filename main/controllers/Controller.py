@@ -32,17 +32,27 @@ def notion_service(subpath):
     notion_service_network_port = os.environ.get('NOTION_SERVICE_NETWORK_PORT')
     service_url = f"http://{notion_service_network_name}:{notion_service_network_port}/{subpath}"
     logger.info(f'Redirecting request to {service_url}')
-    
+    if request.get_data().get('call_type','sync') == 'async':
     # Spawn a new thread for the service call
-    threading.Thread(target=async_service_call, args=(
-        request.method,
-        service_url,
-        {key: value for key, value in request.headers if key != 'Host'},
-        request.get_data(),
-        request.cookies
-    )).start()
+        threading.Thread(target=async_service_call, args=(
+            request.method,
+            service_url,
+            {key: value for key, value in request.headers if key != 'Host'},
+            request.get_data(),
+            request.cookies
+        )).start()
 
-    return jsonify({"message": "Request is being processed"}), 202
+        return jsonify({"message": "Request is being processed"}), 202
+    else:
+        response = requests.request(
+             method=request.method,
+                url=service_url,
+                headers={key:value for key,value in request.headers if key!='Host'},
+                data=request.get_data(),
+                cookies=request.cookies,
+                allow_redirects=False
+                )
+        return (response.content, response.status_code, response.headers.items())
 
 @payload_controller.route("/chatgpt/<path:subpath>", methods=['POST', 'GET', 'PATCH'])
 def chatgpt_service(subpath):
@@ -51,13 +61,24 @@ def chatgpt_service(subpath):
     service_url = f"http://{chatgpt_service_network_name}:{chatgpt_service_network_port}/{subpath}"
     logger.info(f'Redirecting request to {service_url}')
 
+    if request.get_data().get('call_type','sync') == 'async':
     # Spawn a new thread for the service call
-    threading.Thread(target=async_service_call, args=(
-        request.method,
-        service_url,
-        {key: value for key, value in request.headers if key != 'Host'},
-        request.get_data(),
-        request.cookies
-    )).start()
+        threading.Thread(target=async_service_call, args=(
+            request.method,
+            service_url,
+            {key: value for key, value in request.headers if key != 'Host'},
+            request.get_data(),
+            request.cookies
+        )).start()
 
-    return jsonify({"message": "Request is being processed"}), 202
+        return jsonify({"message": "Request is being processed"}), 202
+    else:
+        response = requests.request(
+             method=request.method,
+                url=service_url,
+                headers={key:value for key,value in request.headers if key!='Host'},
+                data=request.get_data(),
+                cookies=request.cookies,
+                allow_redirects=False
+                )
+        return (response.content, response.status_code, response.headers.items())

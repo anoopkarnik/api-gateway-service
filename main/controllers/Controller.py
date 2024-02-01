@@ -1,8 +1,9 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, Response, stream_with_context
 import os
 import logging
 import requests
 import threading
+from flask_cors import cross_origin
 
 logger = logging.getLogger(__name__)
 
@@ -22,9 +23,26 @@ def async_service_call(method, service_url, headers, data, cookies):
     except Exception as e:
         logger.error(f"Error in async call to {service_url}: {e}")
 
+def stream_proxy_response(req_stream):
+    def generate():
+        for chunk in req_stream.iter_content(chunk_size=4096):
+            yield chunk
+    return Response(stream_with_context(generate()), content_type=req_stream.headers['Content-Type'])
+
+
 @payload_controller.route("/",methods=["GET"])
 def health_check():
 	return jsonify({"status":"success"})
+
+@payload_controller.route("/notion_stream/<path:subpath>", methods=['POST', 'GET', 'PATCH'])
+@cross_origin()
+def notion_stream_service(subpath):
+    notion_service_network_name = os.environ.get('NOTION_SERVICE_NETWORK_NAME')
+    notion_service_network_port = os.environ.get('NOTION_SERVICE_NETWORK_PORT')
+    service_url = f"http://{notion_service_network_name}:{notion_service_network_port}/{subpath}"
+    logger.info(f'Redirecting request to {service_url}')
+    req = requests.post(service_url,data=request.data,headers=request.headers, stream=True)
+    return stream_proxy_response(req)
 
 @payload_controller.route("/notion/<path:subpath>", methods=['POST', 'GET', 'PATCH'])
 def notion_service(subpath):

@@ -71,6 +71,7 @@ def notion_service(subpath):
                 cookies=request.cookies,
                 allow_redirects=False
                 )
+        # print(response.content)
         return (response.content, response.status_code, response.headers.items())
 
 @payload_controller.route("/chatgpt/<path:subpath>", methods=['POST', 'GET', 'PATCH'])

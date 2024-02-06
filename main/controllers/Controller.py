@@ -45,6 +45,7 @@ def notion_stream_service(subpath):
     return stream_proxy_response(req)
 
 @payload_controller.route("/notion/<path:subpath>", methods=['POST', 'GET', 'PATCH'])
+@cross_origin()
 def notion_service(subpath):
     notion_service_network_name = os.environ.get('NOTION_SERVICE_NETWORK_NAME')
     notion_service_network_port = os.environ.get('NOTION_SERVICE_NETWORK_PORT')
@@ -73,6 +74,7 @@ def notion_service(subpath):
         return (response.content, response.status_code, response.headers.items())
 
 @payload_controller.route("/chatgpt/<path:subpath>", methods=['POST', 'GET', 'PATCH'])
+@cross_origin()
 def chatgpt_service(subpath):
     chatgpt_service_network_name = os.environ.get('CHATGPT_SERVICE_NETWORK_NAME')
     chatgpt_service_network_port = os.environ.get('CHATGPT_SERVICE_NETWORK_PORT')

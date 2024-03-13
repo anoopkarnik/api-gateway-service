@@ -104,19 +104,32 @@ def chatgpt_service(subpath):
                 )
         return (response.content, response.status_code, response.headers.items())
     
-@payload_controller.route("/supabase", methods=['POST', 'GET', 'PATCH'])
+SERVICE_MAPPINGS = {'studio': 'supabase-studio','kong': 'supabase-kong','auth': 'supabase-auth','rest': 'supabase-rest',
+    'realtime': 'realtime-dev.supabase-realtime','storage': 'supabase-storage','imgproxy': 'supabase-imgproxy',
+    'meta': 'supabase-meta','functions': 'supabase-edge-functions','analytics': 'supabase-analytics','db': 'supabase-db',
+    'vector': 'supabase-vector',
+    # Add other services here if necessary
+}
+PORT_MAPPINGS = {'studio': '8443','kong': '8443','auth': '9999','rest': '3000',
+    'realtime': '4000','storage': '5000','imgproxy': '5001',
+    'meta': '8080','analytics': '4000','db': '5433',
+    # Add other services here if necessary
+}
+    
+@payload_controller.route("/<service_name>/<path:subpath>", methods=['POST', 'GET', 'PATCH','DELETE'])
 @cross_origin()
-def supabase_service():
-    supabase_service_network_name = os.environ.get('SUPABASE_SERVICE_NETWORK_NAME')
+def supabase_service(service_name,subpath):
+    supabase_service_network_name = SERVICE_MAPPINGS.get(service_name)
     supabase_service_network_port = os.environ.get('SUPABASE_SERVICE_NETWORK_PORT')
-    service_url = f"http://{supabase_service_network_name}:{supabase_service_network_port}"
+    service_url = f"http://{supabase_service_network_name}:{supabase_service_network_port}/{subpath}"
     logger.info(f'Redirecting request to {service_url}')
     response = requests.request(
-        method=request.method,
-        url=service_url,
-        headers={key:value for key,value in request.headers},
-        data=request.get_data(),
-        cookies=request.cookies,
-        allow_redirects=False
-    )
-    return response
+            method=request.method,
+            url=service_url,
+            headers={key:value for key,value in request.headers if key!='Host'},
+            data=request.get_data(),
+            cookies=request.cookies,
+            allow_redirects=False,
+            stream=True
+            )
+    return Response(stream_with_context(response.iter_content()), content_type=response.headers['Content-Type'], status=response.status_code)

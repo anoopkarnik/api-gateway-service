@@ -110,13 +110,13 @@ SERVICE_MAPPINGS = {'studio': 'supabase-studio','kong': 'supabase-kong','auth': 
     'vector': 'supabase-vector',
     # Add other services here if necessary
 }
-PORT_MAPPINGS = {'studio': '8443','kong': '8443','auth': '9999','rest': '3000',
+PORT_MAPPINGS = {'studio': '8005','kong': '8005','auth': '9999','rest': '3000',
     'realtime': '4000','storage': '5000','imgproxy': '5001',
-    'meta': '8080','analytics': '4000','db': '5433',
+    'meta': '8080','analytics': '4000','db': '5432',
     # Add other services here if necessary
 }
     
-@payload_controller.route("/<service_name>/<path:subpath>", methods=['POST', 'GET', 'PATCH','DELETE'])
+@payload_controller.route("/<path:service_name>/<path:subpath>", methods=['POST', 'GET', 'PATCH','DELETE'])
 @cross_origin()
 def supabase_service(service_name,subpath):
     supabase_service_network_name = SERVICE_MAPPINGS.get(service_name)

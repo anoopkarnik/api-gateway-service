@@ -104,32 +104,19 @@ def chatgpt_service(subpath):
                 )
         return (response.content, response.status_code, response.headers.items())
     
-@payload_controller.route("/supabase/<path:subpath>", methods=['POST', 'GET', 'PATCH'])
+@payload_controller.route("/supabase", methods=['POST', 'GET', 'PATCH'])
 @cross_origin()
-def supabase_service(subpath):
+def supabase_service():
     supabase_service_network_name = os.environ.get('SUPABASE_SERVICE_NETWORK_NAME')
     supabase_service_network_port = os.environ.get('SUPABASE_SERVICE_NETWORK_PORT')
-    service_url = f"http://{supabase_service_network_name}:{supabase_service_network_port}/{subpath}"
+    service_url = f"http://{supabase_service_network_name}:{supabase_service_network_port}"
     logger.info(f'Redirecting request to {service_url}')
-
-    if request.json.get('call_type','sync') == 'async':
-    # Spawn a new thread for the service call
-        threading.Thread(target=async_service_call, args=(
-            request.method,
-            service_url,
-            {key: value for key, value in request.headers if key != 'Host'},
-            request.get_data(),
-            request.cookies
-        )).start()
-
-        return jsonify({"message": "Request is being processed"}), 202
-    else:
-        response = requests.request(
-             method=request.method,
-                url=service_url,
-                headers={key:value for key,value in request.headers if key!='Host'},
-                data=request.get_data(),
-                cookies=request.cookies,
-                allow_redirects=False
-                )
-        return (response.content, response.status_code, response.headers.items())
+    response = requests.request(
+        method=request.method,
+        url=service_url,
+        headers={key:value for key,value in request.headers},
+        data=request.get_data(),
+        cookies=request.cookies,
+        allow_redirects=False
+    )
+    return response

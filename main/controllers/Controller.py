@@ -120,7 +120,7 @@ PORT_MAPPINGS = {'studio': '8443','kong': '8443','auth': '9999','rest': '3000',
 @cross_origin()
 def supabase_service(service_name,subpath):
     supabase_service_network_name = SERVICE_MAPPINGS.get(service_name)
-    supabase_service_network_port = os.environ.get('SUPABASE_SERVICE_NETWORK_PORT')
+    supabase_service_network_port = PORT_MAPPINGS.get(service_name)
     service_url = f"http://{supabase_service_network_name}:{supabase_service_network_port}/{subpath}"
     logger.info(f'Redirecting request to {service_url}')
     response = requests.request(
